@@ -1,7 +1,7 @@
 import { createStore } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist';
 import { createMemoryStorage } from 'storage-memory';
-import { autoMergeDeep, createWhitelist, createBlacklist } from '../index';
+import { autoMergeDeep, createWhitelist, createBlacklist } from '../src';
 import stateConfig from './reducers/config';
 import { SET_STATE, WHITELIST_TYPE } from './constants';
 import {

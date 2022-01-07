@@ -1,6 +1,9 @@
 # About this package
 
-If your redux state is deeply nested you don't have to create nested persist configs. You can easily create a whitelist or blacklist for fields at any level of your state. 
+It contains transforms and state reconciler for [Redux Persist](https://www.npmjs.com/package/redux-persist) giving you a possibility
+to define a nested configuration for your redux-persist.
+
+If your redux state is deeply nested you don't have to create multiple, nested persist configs. You can easily create a whitelist or a blacklist for fields at any level of your state, using simple dot notation```[someProp.secondLevel.thirdLevel.anotherLevel]```
 
 The state should be as flat as possible but sometimes is not
 and in that case, this will be very helpful.
@@ -22,7 +25,7 @@ npm install redux-deep-persist
 
 ## Usage
 
-Configuration is similar to the [redux-persist](https://github.com/rt2zz/redux-persist#basic-usage), the only difference is you don't have to define nested persist configs. You can use _transforms_ together with _autoMergeDeep_ state reconciler.
+Configuration is similar to the [Redux Persist](https://github.com/rt2zz/redux-persist#basic-usage), the only difference is you don't have to define nested persist configs. You can use _transforms_ together with _autoMergeDeep_ state reconciler.
 
 It doesn't matter how deep you want to persist your state.
 
