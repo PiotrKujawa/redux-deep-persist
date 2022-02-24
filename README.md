@@ -114,7 +114,7 @@ you may see the following errors:
     - _it occurs when you createWhitelist or createBlacklist multiple times for the same root state key_
 
 ### Demo page (temporary address)
-https://rdp-2k9ld0sj29sm.herokuapp.com/
+[Redux Deep Persist Demo](https://dev835.d86k7pvhbipq8.amplifyapp.com/)
 
 ### License
 [MIT](https://opensource.org/licenses/MIT)
