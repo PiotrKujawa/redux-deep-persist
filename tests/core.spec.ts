@@ -1,6 +1,6 @@
-import { createBlacklist, createWhitelist, autoMergeDeep } from '../index';
+import { createBlacklist, createWhitelist, autoMergeDeep } from '../src';
 import { VALUE } from './constants';
-import { PLACEHOLDER_UNDEFINED } from '../constants';
+import { PLACEHOLDER_UNDEFINED } from '../src/constants';
 
 const STATE_KEY = 'stateKey';
 const inboundObj1 = {
@@ -127,7 +127,7 @@ test('createWhitelist works as expected', () => {
 });
 
 test('autoMergeDeep works as expected', () => {
-    const value = autoMergeDeep<any>(inboundObj4, initialState, initialState, { debug: false });
+    const value = autoMergeDeep(inboundObj4, initialState, initialState, { debug: false });
     const expected = {
         p1: {
             p2: VALUE,

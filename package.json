@@ -5,8 +5,11 @@
   "main": "lib/index.js",
   "types": "lib",
   "scripts": {
-    "build": "tsc -p .",
-    "test": "jest --forceExit"
+    "clean": "rimraf lib",
+    "build": "npm run clean && tsc -p .",
+    "prepare": "npm run build",
+    "test": "jest --forceExit",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [
     "redux persist",
@@ -35,6 +38,7 @@
     "prettier": "2.4.1",
     "redux": "4.1.2",
     "redux-persist": "6.0.0",
+    "rimraf": "^3.0.2",
     "storage-memory": "0.0.2",
     "ts-jest": "27.0.7",
     "ts-node": "10.4.0",

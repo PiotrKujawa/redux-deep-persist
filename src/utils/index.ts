@@ -13,9 +13,7 @@ export const isArray =
     Array.isArray ||
     function (value: any) {
         return (
-            value !== null &&
-            typeof value !== 'undefined' &&
-            isLength(value.length) &&
+            isLength(value && value.length) &&
             value.length >= 0 &&
             Object.prototype.toString.call(value) === '[object Array]'
         );
@@ -26,20 +24,24 @@ export const isPlainObject = function (item: any) {
 };
 
 export const isIntegerString = function (x: any) {
-    return !!/^([1-9][0-9]*|0{1})$/g.exec(x);
+    return String(~~x) === x && Number(x) >= 0;
 };
 
 export const isString = function (x: any) {
     return Object.prototype.toString.call(x) === '[object String]';
 };
 
-export const isDate = (x: any) => x instanceof Date;
+export const isDate = function (x: any) {
+    return Object.prototype.toString.call(x) === '[object Date]';
+};
 
-export const isEmpty = (obj: TObject) => Object.keys(obj).length === 0;
+export const isEmpty = function (obj: TObject) {
+    return Object.keys(obj).length === 0;
+};
 
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 
-export function getCircularPath(obj: TObject, path?: string, seen?: Set<any>): string | null {
+export const getCircularPath = function (obj: TObject, path?: string, seen?: Set<any>): string | null {
     seen || (seen = new Set([obj]));
     path || (path = '');
 
@@ -57,7 +59,7 @@ export function getCircularPath(obj: TObject, path?: string, seen?: Set<any>): s
     }
 
     return null;
-}
+};
 
 export const _cloneDeep = function (obj: TObject) {
     if (!isObjectLike(obj)) {
@@ -86,7 +88,7 @@ export const cloneDeep = function (obj: TObject) {
     return _cloneDeep(obj);
 };
 
-export const difference = (base: any, newValue: any): TObject => {
+export const difference = function (base: any, newValue: any): TObject {
     if (base === newValue) {
         return {};
     }
@@ -99,8 +101,12 @@ export const difference = (base: any, newValue: any): TObject => {
     const r = cloneDeep(newValue);
 
     // deleted values
-    const deletedValues = Object.keys(l).reduce((acc, key) => {
-        return hasOwnProperty.call(r, key) ? acc : { ...acc, [key]: undefined };
+    const deletedValues = Object.keys(l).reduce((acc: TObject, key) => {
+        if (hasOwnProperty.call(r, key)) {
+            return acc;
+        }
+        acc[key] = undefined;
+        return acc;
     }, {});
 
     // date values
@@ -112,9 +118,10 @@ export const difference = (base: any, newValue: any): TObject => {
     }
 
     // added values
-    const result: TObject = Object.keys(r).reduce((acc, key) => {
+    const result: TObject = Object.keys(r).reduce((acc: TObject, key) => {
         if (!hasOwnProperty.call(l, key)) {
-            return { ...acc, [key]: r[key] };
+            acc[key] = r[key];
+            return acc;
         }
 
         const diff = difference(l[key], r[key]);
@@ -127,7 +134,8 @@ export const difference = (base: any, newValue: any): TObject => {
             return acc; // no difference
         }
 
-        return { ...acc, [key]: diff }; // new value
+        acc[key] = diff; // new value
+        return acc;
     }, deletedValues);
 
     delete result._persist;
@@ -167,7 +175,7 @@ export const dissocPath = function (obj: TObject, pathArray: string[]) {
     return clone;
 };
 
-function _mergeDeep(
+const _mergeDeep = function (
     options: {
         preservePlaceholder?: boolean;
         preserveUndefined?: boolean;
@@ -209,7 +217,7 @@ function _mergeDeep(
         }
     }
     return _mergeDeep(options, target, ...sources);
-}
+};
 
 export const mergeDeep = function (
     target: TObject,
@@ -356,11 +364,11 @@ export const configValidator = function (config: string[] | undefined, name: str
     }
 };
 
-export const transformsValidator = (
+export const transformsValidator = function (
     transforms: Array<{
         deepPersistKey: string;
     }>,
-) => {
+) {
     const keys = transforms?.map((t) => t.deepPersistKey).filter((k) => k) || [];
 
     if (keys.length) {

@@ -16,10 +16,10 @@ import {
     difference,
     isEmpty,
     isDate,
-} from '../utils';
+} from '../src/utils';
 
-import { PLACEHOLDER_UNDEFINED, PACKAGE_NAME } from '../constants';
-import { ConfigType } from '../types';
+import { PLACEHOLDER_UNDEFINED, PACKAGE_NAME } from '../src/constants';
+import { ConfigType } from '../src/types';
 
 const obj1 = {
     a: {

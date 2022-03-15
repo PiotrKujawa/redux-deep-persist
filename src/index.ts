@@ -43,10 +43,10 @@ const createTransform = function (inbound: Function, outbound: Function, config:
 };
 
 // Based on redux-persist/lib/stateReconciler/autoMergeLevel2 but with deep merging
-export const autoMergeDeep = <S extends TObject>(
-    inboundState: S,
-    originalState: S,
-    reducedState: S,
+export const autoMergeDeep = (
+    inboundState: any,
+    originalState: any,
+    reducedState: any,
     {
         debug,
         whitelist,
@@ -58,7 +58,7 @@ export const autoMergeDeep = <S extends TObject>(
         blacklist?: string[];
         transforms?: ReturnType<typeof createWhitelist> | ReturnType<typeof createBlacklist>;
     },
-): S => {
+): any => {
     if (whitelist || blacklist) {
         throw new Error(
             'State reconciler autoMergeDeep uses custom transforms instead of old whitelist or blacklist config properties. Please use createWhitelist or createBlacklist transforms.',
