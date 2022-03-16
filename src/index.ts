@@ -11,11 +11,13 @@ import {
     mergeDeep,
     preserveUndefined,
     configValidator,
+    singleTransformValidator,
     transformsValidator,
+    getRootKeysGroup,
 } from './utils';
 
 import { PLACEHOLDER_UNDEFINED, PACKAGE_NAME } from './constants';
-import { TObject, ConfigType } from './types';
+import { TObject, ConfigType, RootKeysGroup } from './types';
 
 type TransformConfig = {
     whitelist?: string[];
@@ -113,7 +115,7 @@ export const autoMergeDeep = (
 
 // Transform returns a piece of inboundState based on passed whitelist paths
 export const createWhitelist = (key: string, whitelist?: string[]) => {
-    configValidator(whitelist, key, ConfigType.WHITELIST);
+    singleTransformValidator(whitelist, key, ConfigType.WHITELIST);
 
     return createTransform(
         // transform state on its way to being serialized and persisted.
@@ -155,7 +157,7 @@ export const createWhitelist = (key: string, whitelist?: string[]) => {
 
 // Transform returns a piece of inboundState based on passed blacklist paths
 export const createBlacklist = (key: string, blacklist?: string[]) => {
-    configValidator(blacklist, key, ConfigType.BLACKLIST);
+    singleTransformValidator(blacklist, key, ConfigType.BLACKLIST);
     return createTransform(
         // transform state on its way to being serialized and persisted.
         (inboundState: TObject) => {
@@ -181,4 +183,57 @@ export const createBlacklist = (key: string, blacklist?: string[]) => {
             whitelist: [key],
         },
     );
+};
+
+// Helper methods to create a correct redux-persist config
+const getTransforms = function (type: ConfigType, list: RootKeysGroup[]) {
+    return list.map((rootObject) => {
+        const key = Object.keys(rootObject)[0];
+        const paths = rootObject[key];
+        return type === ConfigType.WHITELIST ? createWhitelist(key, paths) : createBlacklist(key, paths);
+    });
+};
+
+export const getPersistConfig = ({
+    key,
+    whitelist,
+    blacklist,
+    storage,
+    transforms,
+    rootReducer,
+}: {
+    key: string;
+    whitelist?: any;
+    blacklist?: any;
+    storage: any;
+    transforms?: any;
+    rootReducer: any;
+}) => {
+    configValidator({ whitelist, blacklist });
+
+    const whitelistByRootKeys = getRootKeysGroup(whitelist);
+    const blacklistByRootKeys = getRootKeysGroup(blacklist);
+
+    const allRootKeys = Object.keys(rootReducer(undefined, {}));
+    const whitelistRootKeys = whitelistByRootKeys.map((rootObject) => Object.keys(rootObject)[0]);
+    const blacklistRootKeys = blacklistByRootKeys.map((rootObject) => Object.keys(rootObject)[0]);
+
+    // in case a whitelist or blacklist is specified the other keys shouldn't be included in a storage
+    const keysToExclude = allRootKeys.filter(
+        (k: string) => whitelistRootKeys.indexOf(k) === -1 && blacklistRootKeys.indexOf(k) === -1,
+    );
+
+    const whitelistTransforms = getTransforms(ConfigType.WHITELIST, whitelistByRootKeys);
+    const blacklistTransforms = getTransforms(ConfigType.BLACKLIST, blacklistByRootKeys);
+
+    // excluding any other keys by creating blacklist transforms for them
+    const excludedKeysTransforms = isArray(whitelist) ? keysToExclude.map((key) => createBlacklist(key)) : [];
+
+    // all the other transforms like user's ones will be added at the end
+    return {
+        key,
+        storage,
+        transforms: [...whitelistTransforms, ...blacklistTransforms, ...excludedKeysTransforms, ...transforms],
+        stateReconciler: autoMergeDeep,
+    };
 };
