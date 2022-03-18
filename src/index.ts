@@ -17,7 +17,7 @@ import {
 } from './utils';
 
 import { PLACEHOLDER_UNDEFINED, PACKAGE_NAME } from './constants';
-import { TObject, ConfigType, RootKeysGroup } from './types';
+import { TObject, ConfigType, RootKeysGroup, PersistConfig, GetPersistConfigArgs } from './types';
 
 type TransformConfig = {
     whitelist?: string[];
@@ -45,22 +45,12 @@ const createTransform = function (inbound: Function, outbound: Function, config:
 };
 
 // Based on redux-persist/lib/stateReconciler/autoMergeLevel2 but with deep merging
-export const autoMergeDeep = (
+export const autoMergeDeep = <S>(
     inboundState: any,
-    originalState: any,
-    reducedState: any,
-    {
-        debug,
-        whitelist,
-        blacklist,
-        transforms,
-    }: {
-        debug?: boolean;
-        whitelist?: string[];
-        blacklist?: string[];
-        transforms?: ReturnType<typeof createWhitelist> | ReturnType<typeof createBlacklist>;
-    },
-): any => {
+    originalState: S,
+    reducedState: S,
+    { debug, whitelist, blacklist, transforms }: PersistConfig<S>,
+): S => {
     if (whitelist || blacklist) {
         throw new Error(
             'State reconciler autoMergeDeep uses custom transforms instead of old whitelist or blacklist config properties. Please use createWhitelist or createBlacklist transforms.',
@@ -194,27 +184,21 @@ const getTransforms = function (type: ConfigType, list: RootKeysGroup[]) {
     });
 };
 
-export const getPersistConfig = ({
+export const getPersistConfig = <S>({
     key,
     whitelist,
     blacklist,
     storage,
     transforms,
     rootReducer,
-}: {
-    key: string;
-    whitelist?: any;
-    blacklist?: any;
-    storage: any;
-    transforms?: any;
-    rootReducer: any;
-}) => {
+    ...rest
+}: GetPersistConfigArgs<S>): PersistConfig<S> => {
     configValidator({ whitelist, blacklist });
 
     const whitelistByRootKeys = getRootKeysGroup(whitelist);
     const blacklistByRootKeys = getRootKeysGroup(blacklist);
 
-    const allRootKeys = Object.keys(rootReducer(undefined, {}));
+    const allRootKeys = Object.keys(rootReducer(undefined, { type: '' }));
     const whitelistRootKeys = whitelistByRootKeys.map((rootObject) => Object.keys(rootObject)[0]);
     const blacklistRootKeys = blacklistByRootKeys.map((rootObject) => Object.keys(rootObject)[0]);
 
@@ -229,11 +213,17 @@ export const getPersistConfig = ({
     // excluding any other keys by creating blacklist transforms for them
     const excludedKeysTransforms = isArray(whitelist) ? keysToExclude.map((key) => createBlacklist(key)) : [];
 
-    // all the other transforms like user's ones will be added at the end
     return {
         key,
         storage,
-        transforms: [...whitelistTransforms, ...blacklistTransforms, ...excludedKeysTransforms, ...transforms],
+        transforms: [
+            ...whitelistTransforms,
+            ...blacklistTransforms,
+            ...excludedKeysTransforms,
+            // all the other transforms like user's ones will be added at the end
+            ...(transforms ? transforms : []),
+        ],
         stateReconciler: autoMergeDeep,
+        ...rest,
     };
 };

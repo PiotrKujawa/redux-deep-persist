@@ -370,10 +370,14 @@ export const singleTransformValidator = function (config: string[] | undefined, 
 };
 
 export const transformsValidator = function (
-    transforms: Array<{
-        deepPersistKey: string;
+    transforms?: Array<{
+        deepPersistKey?: string;
     }>,
 ) {
+    if (!isArray(transforms)) {
+        return;
+    }
+
     const keys = transforms?.map((t) => t.deepPersistKey).filter((k) => k) || [];
 
     if (keys.length) {
@@ -442,7 +446,7 @@ const throwError = function ({ duplicates, subsets }: { duplicates: string[]; su
     }
 };
 
-export const getRootKeysGroup = function (list: string[]) {
+export const getRootKeysGroup = function (list?: string[]) {
     if (!isArray(list)) {
         return [];
     }
