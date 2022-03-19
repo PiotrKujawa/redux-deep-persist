@@ -41,7 +41,9 @@ const persistConfig = {
     // debug: true,
 };
 
-const persistedReducer = persistReducer<any>(persistConfig, rootReducer);
+type RootReducer = ReturnType<typeof rootReducer>;
+
+const persistedReducer = persistReducer<RootReducer>(persistConfig, rootReducer);
 // createStore will cause an open handle issue, but it's nothing to worry about
 // tests are running with --forceExit flag
 let store = createStore(persistedReducer);

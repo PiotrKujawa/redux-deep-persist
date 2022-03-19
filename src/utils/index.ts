@@ -302,11 +302,11 @@ export const preserveUndefined = function (
     return clone;
 };
 
-const unique = function (value: string, index: number, self: string[]) {
+export const unique = function (value: string, index: number, self: string[]) {
     return self.indexOf(value) === index;
 };
 
-const findDuplicatesAndSubsets = function (list: string[]): { duplicates: string[]; subsets: string[] } {
+export const findDuplicatesAndSubsets = function (list: string[]): { duplicates: string[]; subsets: string[] } {
     return list.reduce<{
         duplicates: string[];
         subsets: string[];
@@ -321,15 +321,7 @@ const findDuplicatesAndSubsets = function (list: string[]): { duplicates: string
             const foundSubsets = filteredSubsets.length > 1;
             return {
                 duplicates: [...duplicates, ...(foundDuplicates ? filteredDuplicates : [])],
-                subsets: [...subsets, ...(foundSubsets ? filteredSubsets : [])].filter(unique).sort(function (a, b) {
-                    if (a < b) {
-                        return -1;
-                    }
-                    if (a > b) {
-                        return 1;
-                    }
-                    return 0;
-                }),
+                subsets: [...subsets, ...(foundSubsets ? filteredSubsets : [])].filter(unique).sort(),
             };
         },
         {
@@ -430,7 +422,10 @@ export const configValidator = function ({ whitelist, blacklist }: { whitelist?:
     }
 };
 
-const throwError = function ({ duplicates, subsets }: { duplicates: string[]; subsets: string[] }, listType: string) {
+export const throwError = function (
+    { duplicates, subsets }: { duplicates: string[]; subsets: string[] },
+    listType: string,
+) {
     if (duplicates.length) {
         throw new Error(
             `${PACKAGE_NAME}: duplicates of paths found in your ${listType}.\n\n ${JSON.stringify(duplicates)}`,

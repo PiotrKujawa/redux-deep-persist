@@ -1,6 +1,9 @@
+import { createMemoryStorage } from 'storage-memory';
 import { createBlacklist, createWhitelist, autoMergeDeep } from '../src';
 import { VALUE } from './constants';
 import { PLACEHOLDER_UNDEFINED } from '../src/constants';
+
+const memoryStorage = createMemoryStorage();
 
 const STATE_KEY = 'stateKey';
 const inboundObj1 = {
@@ -127,7 +130,11 @@ test('createWhitelist works as expected', () => {
 });
 
 test('autoMergeDeep works as expected', () => {
-    const value = autoMergeDeep(inboundObj4, initialState, initialState, { debug: false });
+    const value = autoMergeDeep(inboundObj4, initialState, initialState, {
+        debug: false,
+        storage: memoryStorage,
+        key: 'root',
+    });
     const expected = {
         p1: {
             p2: VALUE,
