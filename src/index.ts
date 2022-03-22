@@ -11,18 +11,20 @@ import {
     mergeDeep,
     preserveUndefined,
     configValidator,
+    singleTransformValidator,
     transformsValidator,
+    getRootKeysGroup,
 } from './utils';
 
 import { PLACEHOLDER_UNDEFINED, PACKAGE_NAME } from './constants';
-import { TObject, ConfigType } from './types';
+import { TObject, ConfigType, RootKeysGroup, PersistConfig, GetPersistConfigArgs } from './types';
 
 type TransformConfig = {
     whitelist?: string[];
     blacklist?: string[];
 };
 
-// Taken directly from redux-persist to avoid peerDependency
+// Taken directly from redux-persist to avoid peerDependency with extended output by "deepPersistKey" property
 const createTransform = function (inbound: Function, outbound: Function, config: TransformConfig = {}): any {
     const whitelist = config.whitelist || null;
     const blacklist = config.blacklist || null;
@@ -43,22 +45,12 @@ const createTransform = function (inbound: Function, outbound: Function, config:
 };
 
 // Based on redux-persist/lib/stateReconciler/autoMergeLevel2 but with deep merging
-export const autoMergeDeep = (
+export const autoMergeDeep = <S>(
     inboundState: any,
-    originalState: any,
-    reducedState: any,
-    {
-        debug,
-        whitelist,
-        blacklist,
-        transforms,
-    }: {
-        debug?: boolean;
-        whitelist?: string[];
-        blacklist?: string[];
-        transforms?: ReturnType<typeof createWhitelist> | ReturnType<typeof createBlacklist>;
-    },
-): any => {
+    originalState: S,
+    reducedState: S,
+    { debug, whitelist, blacklist, transforms }: PersistConfig<S>,
+): S => {
     if (whitelist || blacklist) {
         throw new Error(
             'State reconciler autoMergeDeep uses custom transforms instead of old whitelist or blacklist config properties. Please use createWhitelist or createBlacklist transforms.',
@@ -113,7 +105,7 @@ export const autoMergeDeep = (
 
 // Transform returns a piece of inboundState based on passed whitelist paths
 export const createWhitelist = (key: string, whitelist?: string[]) => {
-    configValidator(whitelist, key, ConfigType.WHITELIST);
+    singleTransformValidator(whitelist, key, ConfigType.WHITELIST);
 
     return createTransform(
         // transform state on its way to being serialized and persisted.
@@ -155,7 +147,7 @@ export const createWhitelist = (key: string, whitelist?: string[]) => {
 
 // Transform returns a piece of inboundState based on passed blacklist paths
 export const createBlacklist = (key: string, blacklist?: string[]) => {
-    configValidator(blacklist, key, ConfigType.BLACKLIST);
+    singleTransformValidator(blacklist, key, ConfigType.BLACKLIST);
     return createTransform(
         // transform state on its way to being serialized and persisted.
         (inboundState: TObject) => {
@@ -181,4 +173,57 @@ export const createBlacklist = (key: string, blacklist?: string[]) => {
             whitelist: [key],
         },
     );
+};
+
+// Helper methods to create a correct redux-persist config
+export const getTransforms = function (type: ConfigType, list: RootKeysGroup[]) {
+    return list.map((rootObject) => {
+        const key = Object.keys(rootObject)[0];
+        const paths = rootObject[key];
+        return type === ConfigType.WHITELIST ? createWhitelist(key, paths) : createBlacklist(key, paths);
+    });
+};
+
+export const getPersistConfig = <S>({
+    key,
+    whitelist,
+    blacklist,
+    storage,
+    transforms,
+    rootReducer,
+    ...rest
+}: GetPersistConfigArgs<S>): PersistConfig<S> => {
+    configValidator({ whitelist, blacklist });
+
+    const whitelistByRootKeys = getRootKeysGroup(whitelist);
+    const blacklistByRootKeys = getRootKeysGroup(blacklist);
+
+    const allRootKeys = Object.keys(rootReducer(undefined, { type: '' }));
+    const whitelistRootKeys = whitelistByRootKeys.map((rootObject) => Object.keys(rootObject)[0]);
+    const blacklistRootKeys = blacklistByRootKeys.map((rootObject) => Object.keys(rootObject)[0]);
+
+    // in case a whitelist or blacklist is specified the other keys shouldn't be included in a storage
+    const keysToExclude = allRootKeys.filter(
+        (k: string) => whitelistRootKeys.indexOf(k) === -1 && blacklistRootKeys.indexOf(k) === -1,
+    );
+
+    const whitelistTransforms = getTransforms(ConfigType.WHITELIST, whitelistByRootKeys);
+    const blacklistTransforms = getTransforms(ConfigType.BLACKLIST, blacklistByRootKeys);
+
+    // excluding any other keys by creating blacklist transforms for them
+    const excludedKeysTransforms = isArray(whitelist) ? keysToExclude.map((key) => createBlacklist(key)) : [];
+
+    return {
+        key,
+        storage,
+        transforms: [
+            ...whitelistTransforms,
+            ...blacklistTransforms,
+            ...excludedKeysTransforms,
+            // all the other transforms like user's ones will be added at the end
+            ...(transforms ? transforms : []),
+        ],
+        stateReconciler: autoMergeDeep,
+        ...rest,
+    };
 };

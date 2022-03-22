@@ -1,5 +1,5 @@
 import { PACKAGE_NAME, PLACEHOLDER_UNDEFINED } from '../constants';
-import { TObject, ConfigType } from '../types';
+import { TObject, ConfigType, RootKeysGroup } from '../types';
 
 export const isObjectLike = function (value: any) {
     return typeof value === 'object' && value !== null;
@@ -302,13 +302,38 @@ export const preserveUndefined = function (
     return clone;
 };
 
-const unique = function (value: string, index: number, self: string[]) {
+export const unique = function (value: string, index: number, self: string[]) {
     return self.indexOf(value) === index;
 };
 
-export const configValidator = function (config: string[] | undefined, name: string, type: ConfigType) {
-    const typeText = type === ConfigType.WHITELIST ? 'whitelist' : 'blacklist';
-    const commonErrorMsg1 = `${PACKAGE_NAME}: incorrect ${typeText} configuration.`;
+export const findDuplicatesAndSubsets = function (list: string[]): { duplicates: string[]; subsets: string[] } {
+    return list.reduce<{
+        duplicates: string[];
+        subsets: string[];
+    }>(
+        (entities, path) => {
+            const filteredDuplicates = list.filter((inner) => inner === path);
+            const filteredSubsets = list.filter((inner) => {
+                return (path + '.').indexOf(inner + '.') === 0;
+            });
+            const { duplicates, subsets } = entities;
+            const foundDuplicates = filteredDuplicates.length > 1 && duplicates.indexOf(path) === -1;
+            const foundSubsets = filteredSubsets.length > 1;
+            return {
+                duplicates: [...duplicates, ...(foundDuplicates ? filteredDuplicates : [])],
+                subsets: [...subsets, ...(foundSubsets ? filteredSubsets : [])].filter(unique).sort(),
+            };
+        },
+        {
+            duplicates: [],
+            subsets: [],
+        },
+    );
+};
+
+export const singleTransformValidator = function (config: string[] | undefined, name: string, type: ConfigType) {
+    const listType = type === ConfigType.WHITELIST ? 'whitelist' : 'blacklist';
+    const commonErrorMsg1 = `${PACKAGE_NAME}: incorrect ${listType} configuration.`;
     const commonErrorMsg2 = `Check your create${type === ConfigType.WHITELIST ? 'White' : 'Black'}list arguments.\n\n`;
 
     if (!isString(name) || name.length < 1) {
@@ -319,35 +344,7 @@ export const configValidator = function (config: string[] | undefined, name: str
         return;
     }
 
-    const entities = config.reduce<{
-        duplicates: string[];
-        subsets: string[];
-    }>(
-        (entities, path) => {
-            const filteredDuplicates = config.filter((inner) => inner === path);
-            const filteredSubsets = config.filter((inner) => {
-                return path.indexOf(inner) === 0;
-            });
-
-            const { duplicates, subsets } = entities;
-
-            const foundDuplicates = filteredDuplicates.length > 1 && duplicates.indexOf(path) === -1;
-            const foundSubsets = filteredSubsets.length > 1;
-
-            return {
-                duplicates: [...duplicates, ...(foundDuplicates ? filteredDuplicates : [])],
-                subsets: [...subsets, ...(foundSubsets ? filteredSubsets : [])]
-                    .filter(unique)
-                    .sort((a, b) => a.length - b.length),
-            };
-        },
-        {
-            duplicates: [],
-            subsets: [],
-        },
-    );
-
-    const { duplicates, subsets } = entities;
+    const { duplicates, subsets } = findDuplicatesAndSubsets(config);
 
     if (duplicates.length > 1) {
         throw new Error(
@@ -365,10 +362,14 @@ export const configValidator = function (config: string[] | undefined, name: str
 };
 
 export const transformsValidator = function (
-    transforms: Array<{
-        deepPersistKey: string;
+    transforms?: Array<{
+        deepPersistKey?: string;
     }>,
 ) {
+    if (!isArray(transforms)) {
+        return;
+    }
+
     const keys = transforms?.map((t) => t.deepPersistKey).filter((k) => k) || [];
 
     if (keys.length) {
@@ -382,4 +383,100 @@ export const transformsValidator = function (
             );
         }
     }
+};
+
+export const configValidator = function ({ whitelist, blacklist }: { whitelist?: string[]; blacklist?: string[] }) {
+    // 1. Find duplicated root keys within whitelist and blacklist
+    if (whitelist && blacklist) {
+        const foundKeys = whitelist
+            .map((path) => {
+                const pathArray = path.split('.');
+                const rootKey = pathArray[0];
+
+                if (blacklist.some((path) => path.split('.')[0] === rootKey)) {
+                    return rootKey;
+                }
+            })
+            .filter((value, index, self) => {
+                return value && self.indexOf(value) === index;
+            });
+
+        if (foundKeys?.length) {
+            throw new Error(
+                `${PACKAGE_NAME}: whitelisted root keys also found in the blacklist.\n\n ${JSON.stringify(foundKeys)}`,
+            );
+        }
+    }
+
+    // 2.
+    // - find duplicated root keys in whitelist or blacklist
+    // - find subsets despite an entire parent key was meant to be persisted
+    if (whitelist) {
+        const { duplicates, subsets } = findDuplicatesAndSubsets(whitelist);
+        throwError({ duplicates, subsets }, 'whitelist');
+    }
+
+    if (blacklist) {
+        const { duplicates, subsets } = findDuplicatesAndSubsets(blacklist);
+        throwError({ duplicates, subsets }, 'blacklist');
+    }
+};
+
+export const throwError = function (
+    { duplicates, subsets }: { duplicates: string[]; subsets: string[] },
+    listType: string,
+) {
+    if (duplicates.length) {
+        throw new Error(
+            `${PACKAGE_NAME}: duplicates of paths found in your ${listType}.\n\n ${JSON.stringify(duplicates)}`,
+        );
+    }
+
+    if (subsets.length) {
+        throw new Error(
+            `${PACKAGE_NAME}: subsets of some parent keys found in your ${listType}. You must decide if you want to persist an entire path or its specific subset.\n\n ${JSON.stringify(
+                subsets,
+            )}`,
+        );
+    }
+};
+
+export const getRootKeysGroup = function (list?: string[]) {
+    if (!isArray(list)) {
+        return [];
+    }
+
+    return list.filter(unique).reduce((acc: RootKeysGroup[], curr: string) => {
+        const pathArray = curr.split('.');
+        const rootKey = pathArray[0];
+        const path = pathArray.slice(1).join('.') || undefined;
+
+        const existingElement = acc.filter((entity) => {
+            const key = Object.keys(entity)[0];
+            return key === rootKey;
+        })[0];
+
+        const existingValue = existingElement ? Object.values(existingElement)[0] : undefined;
+
+        // if there is no element then create one
+        if (!existingElement) {
+            acc.push({
+                [rootKey]: path ? [path] : undefined,
+            });
+        }
+
+        // if there is an element but with undefined value and there is something to assign
+        if (existingElement && !existingValue && path) {
+            existingElement[rootKey] = [path];
+        }
+
+        // if there is an element and has a value and there is something to add - extend its value
+        if (existingElement && existingValue && path) {
+            existingValue.push(path);
+        }
+
+        // if there is an element with its value but there is nothing to assign then just return acc
+
+        return acc;
+    }, []);
 };
