@@ -314,7 +314,7 @@ export const findDuplicatesAndSubsets = function (list: string[]): { duplicates:
         (entities, path) => {
             const filteredDuplicates = list.filter((inner) => inner === path);
             const filteredSubsets = list.filter((inner) => {
-                return path.indexOf(inner) === 0;
+                return (path + '.').indexOf(inner + '.') === 0;
             });
             const { duplicates, subsets } = entities;
             const foundDuplicates = filteredDuplicates.length > 1 && duplicates.indexOf(path) === -1;

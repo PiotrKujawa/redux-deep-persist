@@ -24,7 +24,7 @@ type TransformConfig = {
     blacklist?: string[];
 };
 
-// Taken directly from redux-persist to avoid peerDependency
+// Taken directly from redux-persist to avoid peerDependency with extended output by "deepPersistKey" property
 const createTransform = function (inbound: Function, outbound: Function, config: TransformConfig = {}): any {
     const whitelist = config.whitelist || null;
     const blacklist = config.blacklist || null;
@@ -176,7 +176,7 @@ export const createBlacklist = (key: string, blacklist?: string[]) => {
 };
 
 // Helper methods to create a correct redux-persist config
-const getTransforms = function (type: ConfigType, list: RootKeysGroup[]) {
+export const getTransforms = function (type: ConfigType, list: RootKeysGroup[]) {
     return list.map((rootObject) => {
         const key = Object.keys(rootObject)[0];
         const paths = rootObject[key];

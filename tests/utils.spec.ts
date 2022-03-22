@@ -19,6 +19,9 @@ import {
     singleTransformValidator,
     transformsValidator,
     findDuplicatesAndSubsets,
+    throwError,
+    getRootKeysGroup,
+    configValidator,
 } from '../src/utils';
 
 import { PLACEHOLDER_UNDEFINED, PACKAGE_NAME } from '../src/constants';
@@ -335,6 +338,9 @@ test('singleTransformValidator', () => {
     expect(error2.indexOf('["a","a"]') !== -1).toBe(true);
     expect(error3.indexOf('You are trying to persist an entire property') !== -1).toBe(true);
     expect(error3.indexOf('["a.b","a.b.c"]') !== -1).toBe(true);
+    expect(() => {
+        singleTransformValidator(undefined, 'key', ConfigType.WHITELIST);
+    }).not.toThrow();
 });
 
 test('difference', () => {
@@ -357,6 +363,8 @@ test('difference', () => {
     };
 
     expect(value).toEqual(expected);
+    expect(difference(new Date(), new Date())).toEqual({});
+    expect(difference(new Date(1647971725000), new Date(1647971725010))).toEqual(new Date(1647971725010));
 });
 
 test('isEmpty', () => {
@@ -379,7 +387,26 @@ test('getCircularPath', () => {
 });
 
 test('findDuplicatesAndSubsets', () => {
-    const paths = ['b', 'a', 'a.a2', 'f', 'g.1', 'b.b2.b3', 'g.1.2', 'b', 'c.c2', 'c.c2.c3', 'd.d2.d3', 'e'];
+    const paths = [
+        'b',
+        'a',
+        'a.a2',
+        'f',
+        'g.1',
+        'b.b2.b3',
+        'g.1.2',
+        'b',
+        'c.c2',
+        'c.c2.c3',
+        'd.d2.d3',
+        'e',
+        'abc',
+        'ab',
+        'abcd',
+        'cd',
+        'bc',
+        'bcd',
+    ];
     const value = findDuplicatesAndSubsets(paths);
     const expected = {
         duplicates: ['b', 'b'],
@@ -415,4 +442,92 @@ test('transformsValidator', () => {
 
     expect(error.indexOf('redux-deep-persist: found duplicated key') !== -1).toBe(true);
     expect(error.indexOf('Duplicates: ["b","d"]') !== -1).toBe(true);
+    expect(() => {
+        transformsValidator();
+    }).not.toThrow();
+});
+
+test('throwError', () => {
+    let error = '';
+    try {
+        throwError({ duplicates: ['a', 'a'], subsets: ['a', 'a.b'] }, 'whitelist');
+    } catch (e: any) {
+        error = e.message;
+    }
+
+    expect(error.indexOf('duplicates of paths found') !== -1).toBe(true);
+    expect(error.indexOf('["a","a"]') !== -1).toBe(true);
+
+    try {
+        throwError({ duplicates: [], subsets: ['a', 'a.b'] }, 'whitelist');
+    } catch (e: any) {
+        error = e.message;
+    }
+
+    expect(error.indexOf('subsets of some parent keys found') !== -1).toBe(true);
+    expect(error.indexOf('["a","a.b"]') !== -1).toBe(true);
+});
+
+test('getRootKeysGroup', () => {
+    const value = getRootKeysGroup([
+        'rootKey',
+        'rootKey.a.b',
+        'rootKey.c',
+        'rootKey.d.e.f',
+        'rootKey2',
+        'rootKey3.a',
+        'rootKey3.b.c',
+    ]);
+
+    const expected = [{ rootKey: ['a.b', 'c', 'd.e.f'] }, { rootKey2: undefined }, { rootKey3: ['a', 'b.c'] }];
+    expect(value).toEqual(expected);
+    expect(getRootKeysGroup()).toEqual([]);
+});
+
+test('configValidator', () => {
+    let error = '';
+    try {
+        configValidator({
+            whitelist: ['rootKey.a', 'rootKey.c'],
+            blacklist: ['rootKey.b'],
+        });
+    } catch (e: any) {
+        error = e.message;
+    }
+
+    expect(error.indexOf('whitelisted root keys also found in the blacklist') !== -1).toBe(true);
+    expect(error.indexOf('["rootKey"]') !== -1).toBe(true);
+
+    try {
+        configValidator({
+            whitelist: ['rootKey.a', 'rootKey.a.b', 'rootKey2.a'],
+        });
+    } catch (e: any) {
+        error = e.message;
+    }
+
+    expect(error.indexOf('subsets of some parent keys found in your whitelist') !== -1).toBe(true);
+    expect(error.indexOf('["rootKey.a","rootKey.a.b"]') !== -1).toBe(true);
+
+    try {
+        configValidator({
+            whitelist: ['rootKey.a.b', 'rootKey.c.b', 'rootKey.a.b', 'rootKey2'],
+        });
+    } catch (e: any) {
+        error = e.message;
+    }
+
+    expect(error.indexOf('duplicates of paths found in your whitelist') !== -1).toBe(true);
+    expect(error.indexOf('["rootKey.a.b","rootKey.a.b"]') !== -1).toBe(true);
+
+    try {
+        configValidator({
+            blacklist: ['rootKey.a.b', 'rootKey.c.b', 'rootKey.a.b', 'rootKey2'],
+        });
+    } catch (e: any) {
+        error = e.message;
+    }
+
+    expect(error.indexOf('duplicates of paths found in your blacklist') !== -1).toBe(true);
+    expect(error.indexOf('["rootKey.a.b","rootKey.a.b"]') !== -1).toBe(true);
 });

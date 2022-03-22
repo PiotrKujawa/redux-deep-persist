@@ -1,26 +1,27 @@
 import stateConfig from './config';
-import { SET_STATE, RESET_STATE } from '../constants';
+import { SET_STATE } from '../constants';
 
 type Action = {
     type: string;
     payload?: any;
 };
 
-const reducers: { [key: string]: any } = {};
+const reducers = stateConfig.reduce<{ [key: string]: (state: any, action: Action) => any }>(
+    (acc, curr: any, index: number) => {
+        const { initial, modified } = curr;
 
-stateConfig.forEach(({ initial, modified }, index) => {
-    reducers['example' + index] = function (state = initial, action: Action) {
-        switch (action.type) {
-            case SET_STATE: {
-                return modified;
+        acc['example' + index] = function (state = initial, action: Action) {
+            switch (action.type) {
+                case SET_STATE: {
+                    return modified;
+                }
+                default:
+                    return state;
             }
-            case RESET_STATE: {
-                return initial;
-            }
-            default:
-                return state;
-        }
-    };
-});
+        };
+        return acc;
+    },
+    {},
+);
 
 export default reducers;
