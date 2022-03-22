@@ -214,6 +214,7 @@ export const getPersistConfig = <S>({
     const excludedKeysTransforms = isArray(whitelist) ? keysToExclude.map((key) => createBlacklist(key)) : [];
 
     return {
+        ...rest,
         key,
         storage,
         transforms: [
@@ -224,6 +225,5 @@ export const getPersistConfig = <S>({
             ...(transforms ? transforms : []),
         ],
         stateReconciler: autoMergeDeep,
-        ...rest,
     };
 };
