@@ -12,11 +12,7 @@ export const isLength = function (value: any) {
 export const isArray =
     Array.isArray ||
     function (value: any) {
-        return (
-            isLength(value && value.length) &&
-            value.length >= 0 &&
-            Object.prototype.toString.call(value) === '[object Array]'
-        );
+        return isLength(value && value.length) && Object.prototype.toString.call(value) === '[object Array]';
     };
 
 export const isPlainObject = function (item: any) {
