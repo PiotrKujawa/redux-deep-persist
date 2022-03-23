@@ -2,14 +2,23 @@
   "name": "redux-deep-persist",
   "version": "1.0.0",
   "description": "Allows to easily create a deep configuration of a whitelist or blacklist for the redux-persist module.",
+  "author": "Piotr Kujawa <piotrkujawa.dev@gmail.com>",
+  "repository": "github:PiotrKujawa/redux-deep-persist",
   "main": "lib/index.js",
-  "types": "lib",
+  "types": "lib/index.d.ts",
+  "files": [
+    "src",
+    "lib",
+    "README.md"
+  ],
   "scripts": {
     "clean": "rimraf lib",
+    "test": "jest --forceExit",
+    "test-coverage": "jest --forceExit --coverage",
+    "type-check": "tsc --noEmit",
     "build": "npm run clean && tsc -p .",
     "prepare": "npm run build",
-    "test": "jest --forceExit",
-    "type-check": "tsc --noEmit"
+    "prepublish": "npm run build"
   },
   "keywords": [
     "redux persist",
@@ -23,8 +32,7 @@
     "redux nested persist",
     "redux-nested-persist"
   ],
-  "author": "Piotr Kujawa <piotrkujawa.dev@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/jest": "27.0.2",
     "@types/node": "16.11.6",
