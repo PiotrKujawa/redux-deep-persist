@@ -16,8 +16,8 @@
     "test": "jest --forceExit",
     "test-coverage": "jest --forceExit --coverage",
     "type-check": "tsc --noEmit",
-    "build": "npm run clean && tsc -p .",
-    "prepare": "npm run build",
+    "prepare": "npm run clean && tsc -p .",
+    "build": "npm run test && npm run type-check && npm run prepare",
     "prepublish": "npm run build"
   },
   "keywords": [
