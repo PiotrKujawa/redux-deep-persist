@@ -1,6 +1,6 @@
 {
   "name": "redux-deep-persist",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Allows to easily create a deep configuration of a whitelist or blacklist for the redux-persist module.",
   "author": "Piotr Kujawa <piotrkujawa.dev@gmail.com>",
   "repository": "github:PiotrKujawa/redux-deep-persist",

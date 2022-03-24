@@ -85,10 +85,10 @@ Whitelist configuration property contains paths that define pieces of your state
 ### Errors and their meaning
 The package has config validators and if your config is wrong you may see the following errors:
 
-* **"Whitelisted root keys also found in the blacklist."**
+* **"You should not define a whitelist and blacklist in parallel."**
     - _it occurs when you try to use whitelist and blacklist at once, you should choose just one approach_
 
-* **"Duplicates of paths found in your whitelist/blacklist"**
+* **"Duplicates of paths found in your whitelist/blacklist."**
     - _you defined duplicated paths in your whitelist or blacklist arrays. Wrong: ```["root1", "root2.a2", "root1"]```._
 
 * **"Subsets of some parent keys found in your whitelist/blacklist. You must decide if you want to persist an entire path or its specific subset."**

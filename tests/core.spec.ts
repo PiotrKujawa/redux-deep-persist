@@ -253,7 +253,7 @@ test('getTransforms works as expected', () => {
     expect(blacklistTransforms).toHaveLength(2);
 });
 
-test('getPersistConfig works as expected', () => {
+test('getPersistConfig with a whitelist works as expected', () => {
     const whitelistKeys = ['example1', 'example3', 'example7'];
 
     const value = getPersistConfig({
@@ -292,4 +292,46 @@ test('getPersistConfig works as expected', () => {
             transforms: [...whitelistTransforms, ...blacklistTransforms, createBlacklist('static')],
         }),
     );
+});
+
+test('getPersistConfig with a blacklist works as expected', () => {
+    const blacklistKeys = ['example1', 'example3', 'example7'];
+
+    const value = getPersistConfig({
+        key: 'root',
+        storage: memoryStorage,
+        rootReducer,
+        blacklist: blacklistKeys,
+    });
+
+    const blacklistTransforms = stateConfig
+        .map((_example, index) => {
+            const key = 'example' + index;
+            if (blacklistKeys.includes(key)) {
+                return createBlacklist(key);
+            }
+            return undefined;
+        })
+        .filter((t) => t);
+
+    expect(JSON.stringify(value)).toEqual(
+        JSON.stringify({
+            key: 'root',
+            stateReconciler: autoMergeDeep,
+            storage: memoryStorage,
+            transforms: blacklistTransforms,
+        }),
+    );
+});
+
+test('getPersistConfig with a whitelist and blacklist to throw', () => {
+    expect(() => {
+        getPersistConfig({
+            key: 'root',
+            storage: memoryStorage,
+            rootReducer,
+            whitelist: ['example1'],
+            blacklist: ['example2'],
+        });
+    }).toThrow();
 });

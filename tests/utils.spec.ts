@@ -488,15 +488,14 @@ test('configValidator', () => {
     let error = '';
     try {
         configValidator({
-            whitelist: ['rootKey.a', 'rootKey.c'],
+            whitelist: ['rootKey.a'],
             blacklist: ['rootKey.b'],
         });
     } catch (e: any) {
         error = e.message;
     }
 
-    expect(error.indexOf('whitelisted root keys also found in the blacklist') !== -1).toBe(true);
-    expect(error.indexOf('["rootKey"]') !== -1).toBe(true);
+    expect(error.indexOf('you should not define a whitelist and blacklist in parallel') !== -1).toBe(true);
 
     try {
         configValidator({

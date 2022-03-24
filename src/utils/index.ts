@@ -383,25 +383,10 @@ export const transformsValidator = function (
 
 export const configValidator = function ({ whitelist, blacklist }: { whitelist?: string[]; blacklist?: string[] }) {
     // 1. Find duplicated root keys within whitelist and blacklist
-    if (whitelist && blacklist) {
-        const foundKeys = whitelist
-            .map((path) => {
-                const pathArray = path.split('.');
-                const rootKey = pathArray[0];
-
-                if (blacklist.some((path) => path.split('.')[0] === rootKey)) {
-                    return rootKey;
-                }
-            })
-            .filter((value, index, self) => {
-                return value && self.indexOf(value) === index;
-            });
-
-        if (foundKeys?.length) {
-            throw new Error(
-                `${PACKAGE_NAME}: whitelisted root keys also found in the blacklist.\n\n ${JSON.stringify(foundKeys)}`,
-            );
-        }
+    if (whitelist && whitelist.length && blacklist && blacklist.length) {
+        throw new Error(
+            `${PACKAGE_NAME}: you should not define a whitelist and blacklist in parallel. It is allowed to use only one of these lists per config.`,
+        );
     }
 
     // 2.
