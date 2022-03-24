@@ -54,6 +54,8 @@ It doesn't matter how deep you want to persist your state.
 #### Configuration
 
 ```js
+import { getPersistConfig } from 'redux-deep-persist';
+
 const config = getPersistConfig({
     key: 'root',
     storage: LocalStorage, // whatever storage you use
