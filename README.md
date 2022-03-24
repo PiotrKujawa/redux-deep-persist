@@ -1,15 +1,14 @@
-# Redux Deep Persist
+# Redux Deep Persist 
+<a href="https://dev835.d86k7pvhbipq8.amplifyapp.com" target="_blank">Demo Page</a>
+
 
 ## About this package
 
-It contains transforms and state reconciler for [Redux Persist](https://www.npmjs.com/package/redux-persist) giving you a possibility
-to define a nested configuration for your redux-persist.
+It contains transforms and state reconciler for [Redux Persist](https://www.npmjs.com/package/redux-persist) giving you a possibility to define a nested configuration for your redux-persist.
 
-If your redux state is deeply nested you don't have to create multiple, nested persist configs. You can easily create a whitelist or a blacklist for fields at any level of your state, using simple dot notation```[someProp.secondLevel.thirdLevel.anotherLevel]```
+If your redux state is deeply nested you don't have to create multiple, nested persist configs. You can easily create a whitelist or a blacklist for fields at any level of your state, using simple dot notation `[someProp.secondLevel.thirdLevel.anotherLevel]`
 
 The state should be as flat as possible but sometimes is not and in that case, this will be very helpful.
-
-<a href="https://dev835.d86k7pvhbipq8.amplifyapp.com" target="_blank">Redux Deep Persist Demo</a>
 
 ## Installation
 
