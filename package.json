@@ -1,6 +1,6 @@
 {
   "name": "redux-deep-persist",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Allows to easily create a deep configuration of a whitelist or blacklist for the redux-persist module.",
   "author": "Piotr Kujawa <piotrkujawa.dev@gmail.com>",
   "repository": "github:PiotrKujawa/redux-deep-persist",
@@ -8,8 +8,7 @@
   "types": "lib/index.d.ts",
   "files": [
     "src",
-    "lib",
-    "README.md"
+    "lib"
   ],
   "scripts": {
     "clean": "rimraf lib",

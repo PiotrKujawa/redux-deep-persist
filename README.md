@@ -1,14 +1,17 @@
 # Redux Deep Persist 
+
+[![npm version](https://img.shields.io/npm/v/redux-deep-persist?style=flat-square)](https://img.shields.io/npm/v/redux-deep-persist) [![npm downloads](https://img.shields.io/npm/dw/redux-deep-persist?style=flat-square)](https://img.shields.io/npm/dw/redux-deep-persist) [![license](https://img.shields.io/github/license/PiotrKujawa/redux-deep-persist?style=flat-square)](https://img.shields.io/github/license/PiotrKujawa/redux-deep-persist)
+
 <a href="https://dev835.d86k7pvhbipq8.amplifyapp.com" target="_blank">Demo Page</a>
 
 
 ## About this package
 
-It contains transforms and state reconciler for [Redux Persist](https://www.npmjs.com/package/redux-persist) giving you a possibility to define a nested configuration for your redux-persist.
+Redux Deep Perist contains transforms and state reconciler for [Redux Persist](https://www.npmjs.com/package/redux-persist) giving you a possibility to define a nested configuration for your redux-persist.
 
 If your redux state is deeply nested you don't have to create multiple, nested persist configs. You can easily create a whitelist or a blacklist for fields at any level of your state, using simple dot notation `[someProp.secondLevel.thirdLevel.anotherLevel]`
 
-The state should be as flat as possible but sometimes is not and in that case, this will be very helpful.
+Redux documentation recommends to keep the state as flat as possible, but it is not always possible. Redux Deep Persist may be very helpful in a situation when deep nesting is hard to avoid.
 
 ## Installation
 
@@ -25,7 +28,7 @@ It doesn't matter how deep you want to persist your state.
 #### State:
 ```js
 {
-    root1: {
+    property1: {
         a1: {
             b1: {
                 c1: 'some value'
@@ -38,7 +41,7 @@ It doesn't matter how deep you want to persist your state.
             }
         }
     },
-    root2: {
+    property2: {
         a1: {
             b1: {
                 c1: {
@@ -60,9 +63,9 @@ const config = getPersistConfig({
     key: 'root',
     storage: LocalStorage, // whatever storage you use
     whitelist: [
-        'root1.a1.b1',  
-        'root1.a2.b2.c2',  
-        'root2.a2',
+        'property1.a1.b1',  
+        'property1.a2.b2.c2',  
+        'property2.a2',
     ],
     rootReducer, // your root reducer must be also passed here
     ... // any other props from original redux-persist config omitting the state reconciler
@@ -91,10 +94,10 @@ The package has config validators and if your config is wrong you may see the fo
     - _it occurs when you try to use whitelist and blacklist at once, you should choose just one approach_
 
 * **"Duplicates of paths found in your whitelist/blacklist."**
-    - _you defined duplicated paths in your whitelist or blacklist arrays. Wrong: ```["root1", "root2.a2", "root1"]```._
+    - _you defined duplicated paths in your whitelist or blacklist arrays. Wrong: ```["property1", "property2.a2", "property1"]```._
 
 * **"Subsets of some parent keys found in your whitelist/blacklist. You must decide if you want to persist an entire path or its specific subset."**
-    - _i.e. if you want to persist the entire "user" property you can't list its subsets in the config. Wrong: ```["root1", "root1.a1"]```_
+    - _i.e. if you want to persist the entire "user" property you can't list its subsets in the config. Wrong: ```["property1", "property1.a1"]```_
 
 ### Examples repository
 - coming soon
