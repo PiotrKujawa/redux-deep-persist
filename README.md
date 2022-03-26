@@ -97,7 +97,7 @@ The package has config validators and if your config is wrong you may see the fo
     - _you defined duplicated paths in your whitelist or blacklist arrays. Wrong: ```["property1", "property2.a2", "property1"]```._
 
 * **"Subsets of some parent keys found in your whitelist/blacklist. You must decide if you want to persist an entire path or its specific subset."**
-    - _i.e. if you want to persist the entire "user" property you can't list its subsets in the config. Wrong: ```["property1", "property1.a1"]```_
+    - _i.e. if you want to persist the entire "property1" you can't list its subsets in the config. Wrong: ```["property1", "property1.a1"]```_
 
 ### Examples repository
 - coming soon
