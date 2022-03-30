@@ -1,15 +1,14 @@
 # Redux Deep Persist 
 
-[![npm version](https://img.shields.io/npm/v/redux-deep-persist?style=flat-square)](https://img.shields.io/npm/v/redux-deep-persist) [![npm downloads](https://img.shields.io/npm/dw/redux-deep-persist?style=flat-square)](https://img.shields.io/npm/dw/redux-deep-persist) [![license](https://img.shields.io/github/license/PiotrKujawa/redux-deep-persist?style=flat-square)](https://img.shields.io/github/license/PiotrKujawa/redux-deep-persist)
+[![npm version](https://img.shields.io/npm/v/redux-deep-persist?style=flat-square)](https://img.shields.io/npm/v/redux-deep-persist) [![build status](https://img.shields.io/github/workflow/status/PiotrKujawa/redux-deep-persist/prepublish)](https://img.shields.io/github/workflow/status/PiotrKujawa/redux-deep-persist/prepublish) [![npm downloads](https://img.shields.io/npm/dw/redux-deep-persist?style=flat-square)](https://img.shields.io/npm/dw/redux-deep-persist) [![license](https://img.shields.io/github/license/PiotrKujawa/redux-deep-persist?style=flat-square)](https://img.shields.io/github/license/PiotrKujawa/redux-deep-persist)
 
 <a href="https://rdp-demo.net" target="_blank">Demo Page</a>
-
 
 ## About this package
 
 Redux Deep Perist contains transforms and state reconciler for [Redux Persist](https://www.npmjs.com/package/redux-persist) giving you a possibility to define a nested configuration for your redux-persist.
 
-If your redux state is deeply nested you don't have to create multiple, nested persist configs. You can easily create a whitelist or a blacklist for fields at any level of your state, using simple dot notation `[someProp.secondLevel.thirdLevel.anotherLevel]`
+If your redux state is deeply nested you don't have to create multiple, nested persist configs. You can easily create a whitelist or a blacklist for fields at any level of your state, using simple dot notation `['someProp.secondLevel.thirdLevel.anotherLevel']`
 
 Redux documentation recommends to keep the state as flat as possible, but it is not always possible. Redux Deep Persist may be very helpful in a situation when deep nesting is hard to avoid.
 
