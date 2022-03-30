@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/redux-deep-persist?style=flat-square)](https://img.shields.io/npm/v/redux-deep-persist) [![npm downloads](https://img.shields.io/npm/dw/redux-deep-persist?style=flat-square)](https://img.shields.io/npm/dw/redux-deep-persist) [![license](https://img.shields.io/github/license/PiotrKujawa/redux-deep-persist?style=flat-square)](https://img.shields.io/github/license/PiotrKujawa/redux-deep-persist)
 
-<a href="https://dev835.d86k7pvhbipq8.amplifyapp.com" target="_blank">Demo Page</a>
+<a href="https://rdp-demo.net" target="_blank">Demo Page</a>
 
 
 ## About this package
