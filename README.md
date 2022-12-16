@@ -1,6 +1,6 @@
 # Redux Deep Persist 
 
-[![npm version](https://img.shields.io/npm/v/redux-deep-persist?style=flat-square)](https://img.shields.io/npm/v/redux-deep-persist) [![build status](https://img.shields.io/github/workflow/status/PiotrKujawa/redux-deep-persist/prepublish)](https://img.shields.io/github/workflow/status/PiotrKujawa/redux-deep-persist/prepublish) [![npm downloads](https://img.shields.io/npm/dw/redux-deep-persist?style=flat-square)](https://img.shields.io/npm/dw/redux-deep-persist) [![license](https://img.shields.io/github/license/PiotrKujawa/redux-deep-persist?style=flat-square)](https://img.shields.io/github/license/PiotrKujawa/redux-deep-persist)
+[![npm version](https://img.shields.io/npm/v/redux-deep-persist?style=flat-square)](https://img.shields.io/npm/v/redux-deep-persist) [![build status](https://img.shields.io/github/actions/workflow/status/PiotrKujawa/redux-deep-persist/build.yml?branch=master)](https://img.shields.io/github/actions/workflow/status/PiotrKujawa/redux-deep-persist/build.yml?branch=master) [![npm downloads](https://img.shields.io/npm/dw/redux-deep-persist?style=flat-square)](https://img.shields.io/npm/dw/redux-deep-persist) [![license](https://img.shields.io/github/license/PiotrKujawa/redux-deep-persist?style=flat-square)](https://img.shields.io/github/license/PiotrKujawa/redux-deep-persist)
 
 <a href="https://rdp-demo.net" target="_blank">Demo Page</a>
 
